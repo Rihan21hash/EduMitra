@@ -1,0 +1,53 @@
+@import "tailwindcss";
+@import "katex/dist/katex.min.css";
+
+:root {
+  --brand: #6B2B3A;
+  --brand-hover: #58222F;
+  --brand-light: #F4EBEF;
+  --accent: #D8A23C;
+  --accent-light: #FBF4E7;
+  --surface: #F6F0F0;
+  --surface-card: #FFFFFF;
+  --text: #222222;
+  --text-muted: #5E5E5E;
+  --border: #E4D8D8;
+}
+
+body {
+  background-color: var(--surface);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Devanagari text enhancement */
+[lang="mr"], [lang="hi"] {
+  line-height: 1.75;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand);
+}
+
+/* Math equations styling */
+.katex-display {
+  margin: 1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+}

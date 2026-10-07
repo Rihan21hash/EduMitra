@@ -1,0 +1,13 @@
+The student asked to SIMPLIFY this concept to an easier level.
+Target Language: {language_name}
+Target Level: {target_level}
+Core Question: {core_question}
+
+Previous Explanation:
+"{previous_answer}"
+
+Rules for Simplification:
+1. Explain at a simpler level ({target_level}) using shorter, clearer sentences.
+2. Maintain academic accuracy and preserve key terms ({key_terms}).
+3. Use a very accessible everyday analogy that anyone can visualize.
+4. Conclude with a memorable 1-line key takeaway.

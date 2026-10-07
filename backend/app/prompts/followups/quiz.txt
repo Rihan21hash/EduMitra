@@ -1,0 +1,16 @@
+Generate a diagnostic quiz of {num_questions} multiple-choice questions in {language_name} based on this topic.
+Subject: {subject}
+Topic: {topic}
+Core Concept: {core_question}
+Phase: {phase} (diagnostic pre-test or concept comprehension post-test)
+
+Output MUST be a strict JSON array of objects with no extra text or markdown fences:
+[
+  {{
+    "id": "q0",
+    "prompt": "Question text in {language_name}",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "correct_index": 0,
+    "explanation": "Why this option is correct in {language_name}"
+  }}
+]

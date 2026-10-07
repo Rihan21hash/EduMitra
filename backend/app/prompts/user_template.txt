@@ -1,0 +1,9 @@
+Language: {language_name} | Level: {level} | Subject: {subject} | Topic: {topic}
+Intent: {intent}
+Core question: {core_question}
+Key terms to keep: {key_terms}
+Formulas to keep exactly: {formulas}
+Rules: preserve meaning, use natural and accurate {language_name}, keep scientific terms with English brackets on first mention, include one real-world analogy/example.
+Level rules: {level_rules}
+Original student question (for context only): {original_text}
+{validation_feedback}

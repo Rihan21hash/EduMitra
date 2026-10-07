@@ -1,0 +1,5 @@
+Translate the core academic meaning of this explanation into {target_language_name}.
+Preserve technical terms with English brackets on first mention. Do not translate word-by-word; preserve pedagogical clarity.
+
+Content to translate:
+"{previous_answer}"

@@ -1,0 +1,10 @@
+The student wants a deep-dive REAL WORLD EXAMPLE demonstrating this concept.
+Target Language: {language_name}
+Subject: {subject}
+Topic: {topic}
+Core Question: {core_question}
+
+Previous Explanation Context:
+"{previous_answer}"
+
+Provide 2 distinct, highly vivid real-world scenarios or experiments illustrating the principle. Walk through what happens step by step.

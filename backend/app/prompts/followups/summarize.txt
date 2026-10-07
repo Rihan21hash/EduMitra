@@ -1,0 +1,8 @@
+Provide a crisp, bulleted academic SUMMARY of this explanation in {language_name}.
+Include:
+- 3 key core bullet points.
+- 1 key formula or rule (if any).
+- 1 summary takeaway sentence.
+
+Content:
+"{previous_answer}"

@@ -1,0 +1,22 @@
+{
+  "inertia": { "mr": "जडत्व", "hi": "जड़त्व", "en": "inertia" },
+  "force": { "mr": "बल", "hi": "बल", "en": "force" },
+  "motion": { "mr": "गती", "hi": "गति", "en": "motion" },
+  "acceleration": { "mr": "त्वरण", "hi": "त्वरण", "en": "acceleration" },
+  "velocity": { "mr": "वेग", "hi": "वेग", "en": "velocity" },
+  "mass": { "mr": "वस्तुमान", "hi": "द्रव्यमान", "en": "mass" },
+  "momentum": { "mr": "संवेग", "hi": "संवेग", "en": "momentum" },
+  "gravity": { "mr": "गुरुत्वाकर्षण", "hi": "गुरुत्वाकर्षण", "en": "gravity" },
+  "photosynthesis": { "mr": "प्रकाशसंश्लेषण", "hi": "प्रकाश संश्लेषण", "en": "photosynthesis" },
+  "chlorophyll": { "mr": "हरितद्रव्य", "hi": "पर्णहरित", "en": "chlorophyll" },
+  "energy": { "mr": "ऊर्जा", "hi": "ऊर्जा", "en": "energy" },
+  "work": { "mr": "कार्य", "hi": "कार्य", "en": "work" },
+  "current": { "mr": "विद्युतधारा", "hi": "विद्युत धारा", "en": "electric current" },
+  "voltage": { "mr": "व्होल्टेज", "hi": "विभवांतर", "en": "voltage" },
+  "resistance": { "mr": "रोध", "hi": "प्रतिरोध", "en": "resistance" },
+  "atom": { "mr": "अणू", "hi": "परमाणु", "en": "atom" },
+  "molecule": { "mr": "रेणू", "hi": "अणु", "en": "molecule" },
+  "friction": { "mr": "घर्षण", "hi": "घर्षण", "en": "friction" },
+  "equilibrium": { "mr": "संतुलन", "hi": "संतुलन", "en": "equilibrium" },
+  "pressure": { "mr": "दाब", "hi": "दाब", "en": "pressure" }
+}

@@ -1,0 +1,19 @@
+{
+  "formulas": [
+    { "name": "Newton Second Law", "expr": "F = ma", "subject": "Physics" },
+    { "name": "First Equation of Motion", "expr": "v = u + at", "subject": "Physics" },
+    { "name": "Second Equation of Motion", "expr": "s = ut + (1/2)at^2", "subject": "Physics" },
+    { "name": "Third Equation of Motion", "expr": "v^2 = u^2 + 2as", "subject": "Physics" },
+    { "name": "Ohm's Law", "expr": "V = IR", "subject": "Electrical Engineering" },
+    { "name": "Kinetic Energy", "expr": "KE = (1/2)mv^2", "subject": "Physics" },
+    { "name": "Potential Energy", "expr": "PE = mgh", "subject": "Physics" },
+    { "name": "Mass Energy Equivalence", "expr": "E = mc^2", "subject": "Physics" },
+    { "name": "Photosynthesis Equation", "expr": "6CO2 + 6H2O -> C6H12O6 + 6O2", "subject": "Biology" },
+    { "name": "Water Chemical Formula", "expr": "H2O", "subject": "Chemistry" }
+  ],
+  "constants": {
+    "g": { "value": 9.8, "unit": "m/s^2", "name": "Acceleration due to gravity" },
+    "c": { "value": 3e8, "unit": "m/s", "name": "Speed of light" },
+    "h": { "value": 6.626e-34, "unit": "J s", "name": "Planck constant" }
+  }
+}

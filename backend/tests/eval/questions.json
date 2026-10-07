@@ -1,0 +1,242 @@
+[
+  {
+    "id": "mr_01",
+    "language": "mr",
+    "subject": "Physics",
+    "text": "न्यूटनचा पहिला नियम काय आहे?",
+    "expected_topic": "Newton's Laws",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "mr_02",
+    "language": "mr",
+    "subject": "Physics",
+    "text": "गुरुत्वाकर्षण म्हणजे काय आणि त्याचे सूत्र काय आहे?",
+    "expected_topic": "Gravitation",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "mr_03",
+    "language": "mr",
+    "subject": "Biology",
+    "text": "प्रकाशसंश्लेषण प्रक्रियेचे महत्त्व काय आहे?",
+    "expected_topic": "Photosynthesis",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "mr_04",
+    "language": "mr",
+    "subject": "Electrical Engineering",
+    "text": "ओहमचा नियम स्पष्ट करा आणि V = IR चे महत्त्व सांगा.",
+    "expected_topic": "Ohm's Law",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "mr_05",
+    "language": "mr",
+    "subject": "Chemistry",
+    "text": "अणू आणि रेणू यातील फरक काय आहे?",
+    "expected_topic": "Atoms and Molecules",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "mr_06",
+    "language": "mr",
+    "subject": "Mathematics",
+    "text": "पायथागोरसचा सिद्धांत कसा सिद्ध करायचा?",
+    "expected_topic": "Pythagoras Theorem",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "mr_07",
+    "language": "mr",
+    "subject": "Computer Science",
+    "text": "अल्गोरिदम म्हणजे काय आणि त्याचे उदाहरण द्या.",
+    "expected_topic": "Algorithms",
+    "expected_intent": "example_request"
+  },
+  {
+    "id": "mr_08",
+    "language": "mr",
+    "subject": "Physics",
+    "text": "जडत्व म्हणजे काय? दैनंदिन जीवनातील एक उदाहरण द्या.",
+    "expected_topic": "Inertia",
+    "expected_intent": "example_request"
+  },
+  {
+    "id": "mr_09",
+    "language": "mr",
+    "subject": "Physics",
+    "text": "newton cha dusra niyam kay ahe sanga",
+    "expected_topic": "Newton's Laws",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "mr_10",
+    "language": "mr",
+    "subject": "Biology",
+    "text": "Photosynthesis म्हणजे काय?",
+    "expected_topic": "Photosynthesis",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "hi_01",
+    "language": "hi",
+    "subject": "Physics",
+    "text": "न्यूटन का पहला नियम क्या है?",
+    "expected_topic": "Newton's Laws",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "hi_02",
+    "language": "hi",
+    "subject": "Physics",
+    "text": "गुरुत्वाकर्षण बल क्या होता है?",
+    "expected_topic": "Gravitation",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "hi_03",
+    "language": "hi",
+    "subject": "Biology",
+    "text": "प्रकाश संश्लेषण की क्रिया कैसे होती है?",
+    "expected_topic": "Photosynthesis",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "hi_04",
+    "language": "hi",
+    "subject": "Electrical Engineering",
+    "text": "ओम का नियम समझाइए और इसका सूत्र क्या है?",
+    "expected_topic": "Ohm's Law",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "hi_05",
+    "language": "hi",
+    "subject": "Chemistry",
+    "text": "परमाणु और अणु में क्या अंतर है?",
+    "expected_topic": "Atoms and Molecules",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "hi_06",
+    "language": "hi",
+    "subject": "Mathematics",
+    "text": "त्रिकोणमिति के मूलभूत अनुपात क्या हैं?",
+    "expected_topic": "Trigonometry",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "hi_07",
+    "language": "hi",
+    "subject": "Computer Science",
+    "text": "रिकर्शन क्या है? इसका एक उदाहरण दीजिए।",
+    "expected_topic": "Recursion",
+    "expected_intent": "example_request"
+  },
+  {
+    "id": "hi_08",
+    "language": "hi",
+    "subject": "Physics",
+    "text": "जड़त्व का नियम 5 अंक के लिए लिखिए।",
+    "expected_topic": "Inertia",
+    "expected_intent": "exam_answer"
+  },
+  {
+    "id": "hi_09",
+    "language": "hi",
+    "subject": "Physics",
+    "text": "newton ka pehla niyam kya hai samjhaiye",
+    "expected_topic": "Newton's Laws",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "hi_10",
+    "language": "hi",
+    "subject": "Electrical Engineering",
+    "text": "Electric current kaise flow hota hai?",
+    "expected_topic": "Electric Current",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "en_01",
+    "language": "en",
+    "subject": "Physics",
+    "text": "What is Newton's first law of motion?",
+    "expected_topic": "Newton's Laws",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "en_02",
+    "language": "en",
+    "subject": "Physics",
+    "text": "State the universal law of gravitation and its formula.",
+    "expected_topic": "Gravitation",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "en_03",
+    "language": "en",
+    "subject": "Biology",
+    "text": "Explain the process and significance of photosynthesis.",
+    "expected_topic": "Photosynthesis",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "en_04",
+    "language": "en",
+    "subject": "Electrical Engineering",
+    "text": "State Ohm's law and give a practical example.",
+    "expected_topic": "Ohm's Law",
+    "expected_intent": "example_request"
+  },
+  {
+    "id": "en_05",
+    "language": "en",
+    "subject": "Chemistry",
+    "text": "What is the difference between an atom and a molecule?",
+    "expected_topic": "Atoms and Molecules",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "en_06",
+    "language": "en",
+    "subject": "Mathematics",
+    "text": "Explain the Pythagorean theorem with a triangle example.",
+    "expected_topic": "Pythagoras Theorem",
+    "expected_intent": "example_request"
+  },
+  {
+    "id": "en_07",
+    "language": "en",
+    "subject": "Computer Science",
+    "text": "What is binary search algorithm and how does it work?",
+    "expected_topic": "Binary Search",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "en_08",
+    "language": "en",
+    "subject": "Physics",
+    "text": "Explain the concept of inertia in simple terms.",
+    "expected_topic": "Inertia",
+    "expected_intent": "concept_explanation"
+  },
+  {
+    "id": "en_09",
+    "language": "en",
+    "subject": "Electrical Engineering",
+    "text": "Write a 5 marks exam answer for Ohm's law.",
+    "expected_topic": "Ohm's Law",
+    "expected_intent": "exam_answer"
+  },
+  {
+    "id": "en_10",
+    "language": "en",
+    "subject": "Physics",
+    "text": "What is work energy theorem?",
+    "expected_topic": "Work-Energy Theorem",
+    "expected_intent": "concept_explanation"
+  }
+]

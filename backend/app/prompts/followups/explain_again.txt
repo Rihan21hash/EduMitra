@@ -1,0 +1,16 @@
+The student did NOT understand the previous explanation and asked: "Explain again".
+Target Language: {language_name}
+Level: {level}
+Core Question: {core_question}
+Key Terms: {key_terms}
+Attempt Number: {explain_again_count}
+
+Previous Explanation:
+"{previous_answer}"
+
+STRICT RULES FOR EXPLAINING AGAIN:
+1. DO NOT REUSE the phrasing or analogy from the previous explanation.
+2. Use a completely FRESH and DIFFERENT real-world analogy.
+3. Define each key term before using it in any sentence.
+4. Keep sentences short, warm, patient, and conversational.
+{escalation_note}

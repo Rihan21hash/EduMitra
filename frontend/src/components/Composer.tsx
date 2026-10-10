@@ -16,11 +16,18 @@ export function Composer({ onSend, isLoading, uiLang }: ComposerProps) {
   const [text, setText] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("beginner");
   const [selectedMarks, setSelectedMarks] = useState<number>(5);
-  const [langOverride, setLangOverride] = useState("auto");
+  // If user picked Marathi/Hindi as UI language, lock answers to that language.
+  // If UI language is English (default), use "auto" so the backend detects from the question text.
+  const [langOverride, setLangOverride] = useState<string>(uiLang !== "en" ? uiLang : "auto");
   const [isListening, setIsListening] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const speechRecognizerRef = useRef<{ stop: () => void } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Sync answer language when user changes UI language
+  useEffect(() => {
+    setLangOverride(uiLang !== "en" ? uiLang : "auto");
+  }, [uiLang]);
 
   const maxChars = limits.maxQuestionChars || 1000;
   const charsLeft = maxChars - text.length;
@@ -163,8 +170,9 @@ export function Composer({ onSend, isLoading, uiLang }: ComposerProps) {
         </div>
 
         {/* Text Input Box */}
-        <div className="relative rounded-2xl border border-[var(--border)] bg-[var(--surface)] focus-within:border-[var(--brand)] focus-within:ring-2 focus-within:ring-[var(--brand-light)] transition-all">
+        <div suppressHydrationWarning className="relative rounded-2xl border border-[var(--border)] bg-[var(--surface)] focus-within:border-[var(--brand)] focus-within:ring-2 focus-within:ring-[var(--brand-light)] transition-all">
           <textarea
+            suppressHydrationWarning
             ref={textareaRef}
             rows={2}
             value={text}

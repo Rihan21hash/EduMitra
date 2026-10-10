@@ -84,6 +84,7 @@ export interface QuizSubmitResponse {
   score: number;
   total: number;
   percentage: number;
+  improvement_delta?: number | null;
   review: {
     id: string;
     correct_index: number;
@@ -91,16 +92,42 @@ export interface QuizSubmitResponse {
   }[];
 }
 
+export interface TopicProgress {
+  topic: string;
+  baseline_score?: number | null;
+  latest_score?: number | null;
+  pre_score: number | null;
+  post_score: number | null;
+  total: number;
+  improvement: number | null;
+  attempts_count?: number;
+}
+
+export interface ProgressTimelineItem {
+  topic: string;
+  score: number;
+  total: number;
+  percentage: number;
+  phase: string;
+  created_at: string;
+}
+
 export interface ProgressResponse {
   total_quizzes: number;
   average_improvement: number;
-  topics: {
-    topic: string;
-    pre_score: number | null;
-    post_score: number | null;
-    total: number;
-    improvement: number | null;
-  }[];
+  questions_asked?: number;
+  languages_used?: string[];
+  levels_used?: string[];
+  satisfaction_pct?: number;
+  topics: TopicProgress[];
+  timeline?: ProgressTimelineItem[];
+}
+
+export interface ResponseVariantItem {
+  language: string;
+  content: string;
+  origin: string;
+  created_at?: string;
 }
 
 async function handleResponse<T>(res: Response): Promise<T> {
@@ -117,6 +144,62 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return res.json();
 }
 
+/**
+ * SSE Parser helper for reading StreamingResponse streams.
+ */
+async function processSSEStream(
+  res: Response,
+  callbacks: {
+    onEvent?: (event: string, data: any) => void;
+    onError?: (err: any) => void;
+  }
+) {
+  if (!res.body) return;
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      const parts = buffer.split("\n\n");
+      buffer = parts.pop() || "";
+
+      for (const block of parts) {
+        if (!block.trim()) continue;
+        let eventType = "message";
+        let dataStr = "";
+
+        for (const line of block.split("\n")) {
+          if (line.startsWith("event:")) {
+            eventType = line.replace("event:", "").trim();
+          } else if (line.startsWith("data:")) {
+            dataStr = line.replace("data:", "").trim();
+          }
+        }
+
+        if (dataStr) {
+          try {
+            const parsed = JSON.parse(dataStr);
+            callbacks.onEvent?.(eventType, parsed);
+          } catch (_) {
+            callbacks.onEvent?.(eventType, dataStr);
+          }
+        }
+      }
+    }
+  } catch (err: any) {
+    if (err.name !== "AbortError") {
+      callbacks.onError?.(err);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 export const api = {
   async getHealth() {
     const res = await fetch(`${API_BASE_URL}/api/health`);
@@ -125,6 +208,7 @@ export const api = {
       ollama_connected: boolean;
       active_model: string;
       available_models: string[];
+      model_loaded?: boolean;
     }>(res);
   },
 
@@ -155,6 +239,51 @@ export const api = {
       body: JSON.stringify(payload),
     });
     return handleResponse<QuestionResponse>(res);
+  },
+
+  async askQuestionStream(
+    payload: {
+      user_id: string;
+      conversation_id?: string | null;
+      text: string;
+      level: string;
+      exam_marks?: number | null;
+      language_override?: string;
+    },
+    callbacks: {
+      onMeta?: (meta: any) => void;
+      onToken?: (token: string) => void;
+      onDone?: (data: any) => void;
+      onValidation?: (val: any) => void;
+      onError?: (err: any) => void;
+    },
+    signal?: AbortSignal
+  ) {
+    const res = await fetch(`${API_BASE_URL}/api/question/stream`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal,
+    });
+
+    if (!res.ok) {
+      let errBody = { message: "Streaming connection failed" };
+      try {
+        errBody = await res.json();
+      } catch (_) {}
+      throw new Error(errBody.message || "Failed to start stream");
+    }
+
+    await processSSEStream(res, {
+      onEvent: (event, data) => {
+        if (event === "meta") callbacks.onMeta?.(data);
+        else if (event === "token") callbacks.onToken?.(data.token || "");
+        else if (event === "done") callbacks.onDone?.(data);
+        else if (event === "validation") callbacks.onValidation?.(data);
+        else if (event === "error") callbacks.onError?.(data);
+      },
+      onError: callbacks.onError,
+    });
   },
 
   async simplify(payload: {
@@ -200,9 +329,52 @@ export const api = {
     return handleResponse<QuestionResponse>(res);
   },
 
+  async getResponseVariants(responseId: string) {
+    const res = await fetch(`${API_BASE_URL}/api/response/${responseId}/variants`);
+    return handleResponse<{ response_id: string; variants: ResponseVariantItem[] }>(res);
+  },
+
+  async getOrCreateVariant(responseId: string, language: string) {
+    const res = await fetch(`${API_BASE_URL}/api/response/${responseId}/variant`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ language }),
+    });
+    return handleResponse<{ response_id: string; language: string; content: string; origin: string }>(res);
+  },
+
+  async streamVariant(
+    responseId: string,
+    language: string,
+    callbacks: {
+      onToken?: (token: string) => void;
+      onDone?: (data: any) => void;
+      onError?: (err: any) => void;
+    },
+    signal?: AbortSignal
+  ) {
+    const res = await fetch(`${API_BASE_URL}/api/response/${responseId}/variant/stream`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ language }),
+      signal,
+    });
+
+    await processSSEStream(res, {
+      onEvent: (event, data) => {
+        if (event === "token") callbacks.onToken?.(data.token || "");
+        else if (event === "done") callbacks.onDone?.(data);
+        else if (event === "error") callbacks.onError?.(data);
+      },
+      onError: callbacks.onError,
+    });
+  },
+
   async createQuiz(payload: {
     user_id: string;
-    response_id: string;
+    response_id?: string | null;
+    topic_text?: string | null;
+    language?: string;
     num_questions?: number;
     phase?: "pre" | "post";
   }) {

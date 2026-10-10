@@ -45,7 +45,7 @@ async def handle_followup(payload: FollowUpRequest, db: Session = Depends(get_db
 
     start_total = time.perf_counter()
     t0_gen = time.perf_counter()
-    new_answer = await ollama_client.generate(prompt=prompts["user"], system=prompts["system"], temperature=0.4)
+    new_answer = await ollama_client.generate(prompt=prompts["user"], system=prompts["system"], temperature=0.4, num_predict=300)
     gen_ms = int((time.perf_counter() - t0_gen) * 1000)
 
     val = validate_response(
@@ -74,6 +74,22 @@ async def handle_followup(payload: FollowUpRequest, db: Session = Depends(get_db
     db.add(db_resp)
     db.commit()
     db.refresh(db_resp)
+
+    try:
+        from app.models import ResponseVariant, gen_uuid, utc_now
+        var = ResponseVariant(
+            id=gen_uuid(),
+            response_id=db_resp.id,
+            language=target_lang,
+            content=new_answer,
+            origin="original" if payload.action != "translate" else "translated",
+            model=settings.ollama_model,
+            created_at=utc_now()
+        )
+        db.add(var)
+        db.commit()
+    except Exception:
+        db.rollback()
 
     return QuestionResponse(
         conversation_id=question.conversation_id,

@@ -7,3 +7,4 @@ Rules: preserve meaning, use natural and accurate {language_name}, keep scientif
 Level rules: {level_rules}
 Original student question (for context only): {original_text}
 {validation_feedback}
+REMINDER: Write your ENTIRE response in {language_name} using Devanagari script (देवनागरी). Do NOT use Roman/Latin script in your answer.

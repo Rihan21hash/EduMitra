@@ -22,6 +22,47 @@ def load_prompt_file(rel_path: str) -> str:
 SYSTEM_TEMPLATE = load_prompt_file("system.txt")
 USER_TEMPLATE = load_prompt_file("user_template.txt")
 
+from app.lexicon import lexicon_manager
+
+STYLE_GUIDES = {
+    "mr": load_prompt_file("style/marathi.md"),
+    "hi": load_prompt_file("style/hindi.md")
+}
+
+EXEMPLARS = {
+    ("mr", "beginner"): load_prompt_file("examples/mr_beginner.md"),
+    ("mr", "intermediate"): load_prompt_file("examples/mr_intermediate.md"),
+    ("mr", "advanced"): load_prompt_file("examples/mr_advanced.md"),
+    ("hi", "beginner"): load_prompt_file("examples/hi_beginner.md"),
+    ("hi", "intermediate"): load_prompt_file("examples/hi_intermediate.md"),
+    ("hi", "advanced"): load_prompt_file("examples/hi_advanced.md"),
+}
+
+def build_system_prompt(target_language: str, level: str, context_text: str = "") -> str:
+    """Builds an enriched system prompt including style guidelines, lexicon, and exemplars."""
+    lang_name = LANGUAGE_NAMES.get(target_language, "Marathi")
+    base_sys = SYSTEM_TEMPLATE.replace("{language_name}", lang_name)
+    parts = [base_sys]
+
+    # 1. Style Guide
+    style = STYLE_GUIDES.get(target_language)
+    if style:
+        parts.append(f"\n---\n{style}")
+
+    # 2. Lexicon / Dictionary integration
+    if context_text and target_language in ("mr", "hi"):
+        terms = lexicon_manager.get_relevant_terms(context_text, target_language, max_terms=20)
+        lex_formatted = lexicon_manager.format_for_prompt(terms, target_language)
+        if lex_formatted:
+            parts.append(f"\n---\n{lex_formatted}")
+
+    # 3. Few-shot Exemplar
+    exemplar = EXEMPLARS.get((target_language, level.lower()))
+    if exemplar:
+        parts.append(f"\n---\n### संदर्भ उदाहरण (Exemplar Format Reference):\n{exemplar}")
+
+    return "\n".join(parts)
+
 def build_generation_prompts(
     analysis: AnalysisResult,
     target_language: str,
@@ -34,10 +75,10 @@ def build_generation_prompts(
     Builds system and user prompts for generation stage.
     """
     lang_name = LANGUAGE_NAMES.get(target_language, "Marathi")
-    level_rules_obj = get_level_rules(level, exam_marks)
+    level_rules_obj = get_level_rules(level, exam_marks, target_language=target_language)
     level_rules_text = level_rules_obj["instruction"]
 
-    system_prompt = SYSTEM_TEMPLATE.replace("{language_name}", lang_name)
+    system_prompt = build_system_prompt(target_language, level, f"{original_text} {' '.join(analysis.key_terms)}")
 
     val_str = ""
     if validation_feedback:
@@ -61,6 +102,68 @@ def build_generation_prompts(
         "system": system_prompt,
         "user": user_prompt
     }
+
+def build_chat_messages(
+    analysis: AnalysisResult,
+    target_language: str,
+    level: str,
+    original_text: str,
+    exam_marks: Optional[int] = None,
+    validation_feedback: Optional[str] = None,
+    conversation_state: Optional[Any] = None,
+    history_messages: Optional[List[Dict[str, str]]] = None
+) -> List[Dict[str, str]]:
+    """
+    Builds the messages[] array for Ollama /api/chat including:
+    - Enriched system prompt (rules + style + lexicon + exemplar)
+    - Conversation state summary (if present)
+    - Past conversation turns
+    - Current user prompt
+    """
+    prompts = build_generation_prompts(
+        analysis=analysis,
+        target_language=target_language,
+        level=level,
+        original_text=original_text,
+        exam_marks=exam_marks,
+        validation_feedback=validation_feedback
+    )
+
+    messages: List[Dict[str, str]] = []
+
+    # 1. Main system prompt
+    messages.append({
+        "role": "system",
+        "content": prompts["system"]
+    })
+
+    # 2. Conversation state context if present
+    if conversation_state:
+        state_parts = []
+        if getattr(conversation_state, "subject", None):
+            state_parts.append(f"Subject: {conversation_state.subject}")
+        if getattr(conversation_state, "topic", None):
+            state_parts.append(f"Topic: {conversation_state.topic}")
+        if getattr(conversation_state, "summary", None):
+            state_parts.append(f"Rolling Summary: {conversation_state.summary}")
+        if state_parts:
+            messages.append({
+                "role": "system",
+                "content": "Active Discussion Context:\n" + "\n".join(state_parts)
+            })
+
+    # 3. Dialogue history (past turns)
+    if history_messages:
+        for msg in history_messages:
+            messages.append(msg)
+
+    # 4. Current user prompt
+    messages.append({
+        "role": "user",
+        "content": prompts["user"]
+    })
+
+    return messages
 
 def build_followup_prompt(
     action: str,

@@ -7,6 +7,7 @@ class HealthResponse(BaseModel):
     ollama_connected: bool
     active_model: str
     available_models: List[str]
+    model_loaded: Optional[bool] = False
 
 # User
 class UserCreate(BaseModel):
@@ -88,14 +89,21 @@ class ExamAnswerRequest(BaseModel):
 # Quiz
 class QuizCreateRequest(BaseModel):
     user_id: str
-    response_id: str
+    response_id: Optional[str] = None
+    topic_text: Optional[str] = None
+    topic: Optional[str] = None
+    language: Optional[str] = "mr"
     num_questions: int = 3
     phase: str = "post"  # pre | post
+    is_diagnostic: Optional[bool] = False
 
 class QuizQuestionClient(BaseModel):
     id: str
     prompt: str
+    question: Optional[str] = None
     options: List[str]
+    correct_answer: Optional[str] = None
+    correct_index: Optional[int] = None
 
 class QuizCreateResponse(BaseModel):
     quiz_id: str
@@ -105,8 +113,11 @@ class QuizCreateResponse(BaseModel):
 
 class QuizSubmitRequest(BaseModel):
     user_id: str
+    quiz_id: Optional[str] = None
     phase: str = "post"
-    answers: Dict[str, int]  # { "q0": 1, "q1": 3 }
+    baseline_type: Optional[str] = "standard"
+    time_taken_seconds: Optional[int] = 0
+    answers: Dict[str, Any]  # { "q0": 1, "q1": "A" }
 
 class QuestionReview(BaseModel):
     id: str
@@ -116,21 +127,46 @@ class QuestionReview(BaseModel):
 class QuizSubmitResponse(BaseModel):
     score: int
     total: int
+    total_questions: Optional[int] = None
     percentage: float
-    review: List[QuestionReview]
+    feedback: Optional[str] = "Good attempt! Keep practicing."
+    review: List[QuestionReview] = []
+    improvement_delta: Optional[int] = None
 
 # Progress
 class TopicProgress(BaseModel):
     topic: str
+    baseline_score: Optional[int] = None
+    latest_score: Optional[int] = None
     pre_score: Optional[int] = None
     post_score: Optional[int] = None
     total: int
     improvement: Optional[int] = None
+    attempts_count: int = 1
+
+class ProgressTimelineItem(BaseModel):
+    topic: str
+    score: int
+    total: int
+    percentage: float
+    phase: str
+    created_at: str
 
 class ProgressResponse(BaseModel):
     total_quizzes: int
+    total_quizzes_taken: Optional[int] = None
     average_improvement: float
-    topics: List[TopicProgress]
+    average_score: Optional[float] = None
+    total_questions_answered: Optional[int] = 0
+    accuracy_rate: Optional[float] = 0.0
+    questions_asked: int = 0
+    languages_used: List[str] = []
+    levels_used: List[str] = []
+    satisfaction_pct: float = 100.0
+    topics: List[TopicProgress] = []
+    topic_breakdown: Optional[List[Dict[str, Any]]] = []
+    timeline: List[ProgressTimelineItem] = []
+    recent_attempts: Optional[List[Dict[str, Any]]] = []
 
 # Feedback
 class FeedbackRequest(BaseModel):

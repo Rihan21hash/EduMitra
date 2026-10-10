@@ -1,0 +1,7 @@
+# Optional dependencies for AI4Bharat IndicTrans2 translator
+# Base EduMitra installation will use Ollama LLM translator if these are not installed.
+torch>=2.1.0
+transformers>=4.38.0
+sentencepiece>=0.1.99
+sacremoses>=0.0.53
+indic-nlp-library>=0.92

@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.models import Conversation, Question, Response as DBResponse, User
 from app.schemas import ExamAnswerRequest, QuestionResponse, AnswerContent, ValidationResult, MetaInfo, TimingMeta
+from app.pipeline.level_adapter import get_level_rules
 from app.pipeline.orchestrator import run_pipeline
 from app.pipeline.analysis import AnalysisResult
 from app.pipeline.prompt_builder import build_generation_prompts
@@ -45,8 +46,14 @@ async def handle_exam_answer(payload: ExamAnswerRequest, db: Session = Depends(g
             original_text=question.raw_text,
             exam_marks=marks
         )
+        level_rules = get_level_rules("exam", marks)
         t0_gen = time.perf_counter()
-        new_answer = await ollama_client.generate(prompt=prompts["user"], system=prompts["system"], temperature=0.3)
+        new_answer = await ollama_client.generate(
+            prompt=prompts["user"],
+            system=prompts["system"],
+            temperature=0.3,
+            num_predict=level_rules.get("num_predict", 400)
+        )
         gen_ms = int((time.perf_counter() - t0_gen) * 1000)
 
         val = validate_response(
@@ -74,6 +81,22 @@ async def handle_exam_answer(payload: ExamAnswerRequest, db: Session = Depends(g
         db.add(db_resp)
         db.commit()
         db.refresh(db_resp)
+
+        try:
+            from app.models import ResponseVariant, gen_uuid, utc_now
+            var = ResponseVariant(
+                id=gen_uuid(),
+                response_id=db_resp.id,
+                language=parent_resp.language,
+                content=new_answer,
+                origin="original",
+                model=settings.ollama_model,
+                created_at=utc_now()
+            )
+            db.add(var)
+            db.commit()
+        except Exception:
+            db.rollback()
 
         return QuestionResponse(
             conversation_id=question.conversation_id,
@@ -121,7 +144,9 @@ async def handle_exam_answer(payload: ExamAnswerRequest, db: Session = Depends(g
             raw_text=payload.text,
             level="exam",
             exam_marks=marks,
-            language_override=payload.language_override
+            language_override=payload.language_override,
+            conversation_id=conv.id,
+            db=db
         )
 
         db_question = Question(
@@ -155,6 +180,22 @@ async def handle_exam_answer(payload: ExamAnswerRequest, db: Session = Depends(g
         db.add(db_response)
         db.commit()
         db.refresh(db_response)
+
+        try:
+            from app.models import ResponseVariant, gen_uuid, utc_now
+            var = ResponseVariant(
+                id=gen_uuid(),
+                response_id=db_response.id,
+                language=pipe_res["detected_language"],
+                content=pipe_res["answer_text"],
+                origin="original",
+                model=pipe_res["model"],
+                created_at=utc_now()
+            )
+            db.add(var)
+            db.commit()
+        except Exception:
+            db.rollback()
 
         return QuestionResponse(
             conversation_id=conv.id,

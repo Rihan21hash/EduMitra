@@ -16,6 +16,9 @@ import {
   CheckCircle2,
   HelpCircle,
   MessageSquare,
+  BarChart3,
+  Activity,
+  Smile,
 } from "lucide-react";
 
 export default function ProgressPage() {
@@ -47,6 +50,9 @@ export default function ProgressPage() {
     localStorage.setItem("edumitra_ui_lang", lang);
   };
 
+  const timeline = data?.timeline || [];
+  const topics = data?.topics || [];
+
   return (
     <div className="min-h-screen flex flex-col bg-[var(--surface)] text-[var(--text)]">
       <Navbar uiLang={uiLang} onLanguageChange={handleLanguageChange} activePath="/progress" />
@@ -62,51 +68,172 @@ export default function ProgressPage() {
           </p>
         </div>
 
-        {/* Top Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="p-6 rounded-2xl bg-white border border-[var(--border)] flex items-center gap-5 shadow-xs">
-            <div className="w-14 h-14 rounded-2xl bg-[var(--brand-light)] text-[var(--brand)] flex items-center justify-center shrink-0">
-              <TrendingUp className="w-7 h-7" />
+        {/* 4 Summary Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Average Gain */}
+          <div className="p-5 rounded-2xl bg-white border border-[var(--border)] flex items-center gap-4 shadow-xs">
+            <div className="w-12 h-12 rounded-xl bg-[var(--brand-light)] text-[var(--brand)] flex items-center justify-center shrink-0">
+              <TrendingUp className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+              <div className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 {t(progress.improvementMetric, uiLang)}
               </div>
-              <div className="text-3xl font-black text-[var(--brand)] mt-1">
-                {data && data.average_improvement > 0 ? `+${data.average_improvement}` : "0"} pts
+              <div className="text-2xl font-black text-[var(--brand)] mt-0.5">
+                {data && data.average_improvement > 0 ? `+${data.average_improvement}` : "0"} {t(progress.pts, uiLang)}
               </div>
-              <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
-                (post-quiz score − pre-quiz score)
-              </p>
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white border border-[var(--border)] flex items-center gap-5 shadow-xs">
-            <div className="w-14 h-14 rounded-2xl bg-[var(--accent-light)] text-[#8C6013] flex items-center justify-center shrink-0">
-              <Award className="w-7 h-7" />
+          {/* Quizzes Taken */}
+          <div className="p-5 rounded-2xl bg-white border border-[var(--border)] flex items-center gap-4 shadow-xs">
+            <div className="w-12 h-12 rounded-xl bg-[var(--accent-light)] text-[#8C6013] flex items-center justify-center shrink-0">
+              <Award className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+              <div className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 {t(progress.quizzesTaken, uiLang)}
               </div>
-              <div className="text-3xl font-black text-[var(--text)] mt-1">
+              <div className="text-2xl font-black text-[var(--text)] mt-0.5">
                 {data ? data.total_quizzes : 0}
               </div>
-              <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
-                Evaluated concept checkpoints
-              </p>
+            </div>
+          </div>
+
+          {/* Questions Asked */}
+          <div className="p-5 rounded-2xl bg-white border border-[var(--border)] flex items-center gap-4 shadow-xs">
+            <div className="w-12 h-12 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+              <MessageSquare className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                {t(progress.questionsAsked, uiLang)}
+              </div>
+              <div className="text-2xl font-black text-[var(--text)] mt-0.5">
+                {data?.questions_asked ?? 0}
+              </div>
+            </div>
+          </div>
+
+          {/* Satisfaction Rate */}
+          <div className="p-5 rounded-2xl bg-white border border-[var(--border)] flex items-center gap-4 shadow-xs">
+            <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <Smile className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                {t(progress.satisfaction, uiLang)}
+              </div>
+              <div className="text-2xl font-black text-emerald-700 mt-0.5">
+                {data?.satisfaction_pct ?? 100}%
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Topic Breakdown */}
+        {/* Learning Analytics SVG Charts */}
+        {data && (topics.length > 0 || timeline.length > 0) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Chart 1: Topic Mastery (Baseline vs Latest) */}
+            <div className="p-6 rounded-2xl bg-white border border-[var(--border)] shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-sm text-[var(--text)] flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-[var(--brand)]" />
+                  <span>{t(progress.baselineVsLatest, uiLang)}</span>
+                </h3>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                {topics.slice(0, 5).map((top, idx) => {
+                  const basePct = top.total > 0 ? ((top.baseline_score ?? 0) / top.total) * 100 : 0;
+                  const latestPct = top.total > 0 ? ((top.latest_score ?? 0) / top.total) * 100 : 0;
+
+                  return (
+                    <div key={idx} className="space-y-1 text-xs">
+                      <div className="flex items-center justify-between font-medium">
+                        <span className="text-[var(--text)] line-clamp-1">{top.topic}</span>
+                        <span className="text-[var(--text-muted)] font-bold">
+                          {top.latest_score}/{top.total}
+                        </span>
+                      </div>
+                      <div className="w-full bg-[var(--surface)] h-3 rounded-full overflow-hidden flex gap-1 p-0.5 border border-[var(--border)]">
+                        {/* Baseline Bar */}
+                        <div
+                          className="bg-stone-300 h-full rounded-full transition-all duration-500"
+                          style={{ width: `${basePct}%` }}
+                          title={`Baseline: ${top.baseline_score}`}
+                        />
+                        {/* Latest Bar */}
+                        <div
+                          className="bg-[var(--brand)] h-full rounded-full transition-all duration-500"
+                          style={{ width: `${Math.max(0, latestPct - basePct)}%` }}
+                          title={`Latest: ${top.latest_score}`}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Chart 2: Timeline Learning Curve (SVG Line Chart) */}
+            <div className="p-6 rounded-2xl bg-white border border-[var(--border)] shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-sm text-[var(--text)] flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-emerald-600" />
+                  <span>{t(progress.scoreTrend, uiLang)}</span>
+                </h3>
+              </div>
+
+              {timeline.length > 1 ? (
+                <div className="h-40 w-full pt-2 flex items-end">
+                  <svg className="w-full h-full overflow-visible" viewBox="0 0 300 100" preserveAspectRatio="none">
+                    <polyline
+                      fill="none"
+                      stroke="var(--brand)"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      points={timeline
+                        .map((tl, i) => {
+                          const x = (i / (timeline.length - 1)) * 280 + 10;
+                          const y = 90 - (tl.percentage / 100) * 80;
+                          return `${x},${y}`;
+                        })
+                        .join(" ")}
+                    />
+                    {timeline.map((tl, i) => {
+                      const x = (i / (timeline.length - 1)) * 280 + 10;
+                      const y = 90 - (tl.percentage / 100) * 80;
+                      return (
+                        <circle
+                          key={i}
+                          cx={x}
+                          cy={y}
+                          r="4"
+                          className="fill-[var(--accent)] stroke-white stroke-2"
+                        />
+                      );
+                    })}
+                  </svg>
+                </div>
+              ) : (
+                <div className="h-40 flex items-center justify-center text-xs text-[var(--text-muted)] italic">
+                  Complete 2 or more quizzes to see your score trajectory line chart.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Topic Breakdown Table */}
         <div className="p-6 rounded-2xl bg-white border border-[var(--border)] shadow-xs space-y-4">
           <h2 className="text-base font-bold text-[var(--text)]">
             {t(progress.topicBreakdown, uiLang)}
           </h2>
 
           {isLoading ? (
-            <div className="p-8 text-center text-xs text-[var(--text-muted)]">
+            <div className="p-8 text-center text-xs text-[var(--text-muted)] animate-pulse">
               {t(progress.loading, uiLang)}
             </div>
           ) : !data || data.topics.length === 0 ? (
@@ -131,23 +258,30 @@ export default function ProgressPage() {
                       {top.topic}
                     </h3>
                     <div className="flex items-center gap-3 text-xs text-[var(--text-muted)] mt-1">
-                      {top.pre_score !== null && (
+                      {top.baseline_score !== null && top.baseline_score !== undefined && (
                         <span>
-                          {t(progress.preScore, uiLang)}: {top.pre_score}/{top.total}
+                          {t(progress.preScore, uiLang)}: {top.baseline_score}/{top.total}
                         </span>
                       )}
-                      {top.post_score !== null && (
+                      {top.latest_score !== null && top.latest_score !== undefined && (
                         <span>
-                          {t(progress.postScore, uiLang)}: {top.post_score}/{top.total}
+                          {t(progress.postScore, uiLang)}: {top.latest_score}/{top.total}
                         </span>
                       )}
+                      {top.attempts_count ? (
+                        <span>
+                          ({top.attempts_count} {t(progress.attempts, uiLang)})
+                        </span>
+                      ) : null}
                     </div>
                   </div>
 
-                  {top.improvement !== null && (
+                  {top.improvement !== null && top.improvement !== undefined && (
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                       <TrendingUp className="w-3.5 h-3.5" />
-                      <span>+{top.improvement} pts</span>
+                      <span>
+                        {top.improvement >= 0 ? `+${top.improvement}` : top.improvement} {t(progress.pts, uiLang)}
+                      </span>
                     </div>
                   )}
                 </div>

@@ -6,9 +6,13 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+import asyncio
 from app.config import settings
 from app.db import Base, engine
-from app.routers import health, users, question, simplify, exam_answer, followup, quiz, history, feedback
+from app.migrations.migrate_v2 import run_migrations
+from app.lexicon import lexicon_manager
+from app.services.ollama_client import ollama_client
+from app.routers import health, users, question, simplify, exam_answer, followup, quiz, history, feedback, variants
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,8 +22,22 @@ logger = logging.getLogger("edumitra")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Initializing EduMitra database tables...")
+    logger.info("Initializing EduMitra database tables & migrations...")
     Base.metadata.create_all(bind=engine)
+    try:
+        run_migrations(engine)
+    except Exception as e:
+        logger.warning(f"Migration error: {e}")
+
+    logger.info("Loading EduMitra lexicon...")
+    try:
+        lexicon_manager.load()
+    except Exception as e:
+        logger.warning(f"Lexicon load error: {e}")
+
+    logger.info("Triggering Ollama background warm-up...")
+    asyncio.create_task(ollama_client.warmup())
+
     logger.info("EduMitra backend started successfully.")
     yield
     logger.info("EduMitra backend shutting down.")
@@ -74,6 +92,7 @@ async def generic_exception_handler(request: Request, exc: Exception):
 
 # Include Routers
 app.include_router(health.router)
+app.include_router(health.root_health_router)
 app.include_router(users.router)
 app.include_router(question.router)
 app.include_router(simplify.router)
@@ -82,6 +101,7 @@ app.include_router(followup.router)
 app.include_router(quiz.router)
 app.include_router(history.router)
 app.include_router(feedback.router)
+app.include_router(variants.router)
 
 @app.get("/")
 def root():

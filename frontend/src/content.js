@@ -12,7 +12,7 @@ export const featureFlags = {
   examMode: true,
   quiz: true,
   progress: true,
-  streaming: false,
+  streaming: true,
 };
 
 export const site = {
@@ -306,6 +306,13 @@ export const chat = {
   charsRemaining: { en: "characters", hi: "अक्षर", mr: "अक्षरे" },
   deleteConfirm: { en: "Delete this chat?", hi: "क्या यह चैट हटाना चाहते हैं?", mr: "ही चॅट हटवायची आहे का?" },
   uiLanguage: { en: "Interface Language", hi: "इंटरफ़ेस भाषा", mr: "इंटरफेस भाषा" },
+  stop: { en: "Stop Generating", hi: "रोकें", mr: "थांबवा" },
+  warmingUp: { en: "Warming up the model…", hi: "मॉडल तैयार हो रहा है…", mr: "मॉडेल सुरू होत आहे…" },
+  variantLabel: { en: "Answer Language:", hi: "उत्तर भाषा:", mr: "उत्तर भाषा:" },
+  generatingVariant: { en: "Translating answer…", hi: "उत्तर अनुवादित हो रहा है…", mr: "उत्तराचे भाषांतर होत आहे…" },
+  marksBadge: { en: "Marks", hi: "अंक", mr: "गुण" },
+  verifiedBadge: { en: "Verified ✓", hi: "सत्यापित ✓", mr: "पडताळलेले ✓" },
+  verificationNotice: { en: "Please verify with textbook", hi: "पाठ्यपुस्तक से जाँचें", mr: "पुस्तकाशी पडताळा" },
 };
 
 export const exampleQuestions = {
@@ -357,8 +364,15 @@ export const quiz = {
   needsReview: { en: "Review needed. Try 'Explain again' in chat.", hi: "पुनरावलोकन आवश्यक है। 'फिर से समझाएँ' का प्रयास करें।", mr: "अधिक सरावाची गरज आहे. चॅटमध्ये 'पुन्हा समजावा' वापरून पहा." },
   backToChat: { en: "Back to Chat", hi: "चैट पर वापस जाएँ", mr: "चॅटकडे परत जा" },
   retake: { en: "Retake Quiz", hi: "पुनः क्विज़ दें", mr: "पुन्हा चाचणी द्या" },
+  explainAgainPrompt: { en: "Explain again", hi: "फिर से समझाएँ", mr: "पुन्हा समजावा" },
+  viewProgress: { en: "View Progress", hi: "प्रगति देखें", mr: "प्रगती पहा" },
   preQuizBadge: { en: "Diagnostic Pre-Quiz", hi: "नैदानिक पूर्व-क्विज़", mr: "निदान पूर्व-चाचणी" },
   postQuizBadge: { en: "Concept Post-Quiz", hi: "अवधारणा पश्चात्-क्विज़", mr: "संकल्पना पश्चात-चाचणी" },
+  preCheckToggle: { en: "Pre-check Quiz (before reading)", hi: "पूर्व-जाँच क्विज़ (पढ़ने से पहले)", mr: "पूर्व-तपासणी क्विझ (वाचण्यापूर्वी)" },
+  questionCounter: { en: "Question", hi: "प्रश्न", mr: "प्रश्न" },
+  of: { en: "of", hi: "का", mr: "पैकी" },
+  nextQuestion: { en: "Next Question", hi: "अगला प्रश्न", mr: "पुढील प्रश्न" },
+  improvementNotice: { en: "Score improvement:", hi: "स्कोर में वृद्धि:", mr: "गुणांमधील वाढ:" },
 };
 
 export const progress = {
@@ -378,6 +392,29 @@ export const progress = {
     hi: "कुल पूर्ण क्विज़",
     mr: "पूर्ण केलेल्या चाचण्या",
   },
+  questionsAsked: {
+    en: "Questions Asked",
+    hi: "पूछे गए प्रश्न",
+    mr: "विचारलेले प्रश्न",
+  },
+  satisfaction: {
+    en: "Satisfaction Rate",
+    hi: "संतुष्टि दर",
+    mr: "समाधान दर",
+  },
+  scoreTrend: {
+    en: "Learning Score Trend",
+    hi: "सीखने का स्कोर रुझान",
+    mr: "गुण प्रगतीचा आलेख",
+  },
+  baselineVsLatest: {
+    en: "Baseline vs Latest Score",
+    hi: "आधारभूत बनाम नवीनतम अंक",
+    mr: "सुरुवातीचे वि. ताजे गुण",
+  },
+  pts: { en: "pts", hi: "अंक", mr: "गुण" },
+  delta: { en: "Delta", hi: "वृद्धि", mr: "बदल" },
+  attempts: { en: "attempts", hi: "प्रयास", mr: "प्रयत्न" },
   topicBreakdown: {
     en: "Topic-wise Mastery",
     hi: "विषयवार प्रवीणता",

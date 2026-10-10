@@ -66,12 +66,21 @@ def detect_language(text: str, override: str = "auto") -> Dict[str, Any]:
     words = re.findall(r'[\u0900-\u097F]+|[a-zA-Z]+', clean_text.lower())
     
     if deva_ratio > 0.2:
-        mr_matches = sum(1 for w in words if w in MARKERS["devanagari"]["mr"])
-        hi_matches = sum(1 for w in words if w in MARKERS["devanagari"]["hi"])
+        mr_set = set(MARKERS["devanagari"]["mr"])
+        hi_set = set(MARKERS["devanagari"]["hi"])
 
-        # Check for Marathi suffixes/postpositions like -चे, -च्या, -ला
+        def deva_matches_marker(word: str, marker_set: set) -> bool:
+            """Exact match OR the word starts with a marker (handles inflections like आहे→आहेत)."""
+            if word in marker_set:
+                return True
+            return any(word.startswith(m) and len(m) >= 2 for m in marker_set)
+
+        mr_matches = sum(1 for w in words if deva_matches_marker(w, mr_set))
+        hi_matches = sum(1 for w in words if deva_matches_marker(w, hi_set))
+
+        # Check for Marathi suffixes/postpositions like -चे, -च्या, -ला, -चे, -काचे, etc.
         for w in words:
-            if re.search(r'[\u0900-\u097F]+(च्या|चे|चा|ची|त|ने|ला)$', w):
+            if re.search(r'[\u0900-\u097F]+(च्या|चे|चा|ची|काचे|काचा|काची|त|ने|ला|आहेत|आहे)$', w):
                 mr_matches += 1
 
         if mr_matches > hi_matches:
@@ -100,22 +109,33 @@ def detect_language(text: str, override: str = "auto") -> Dict[str, Any]:
             }
 
     # If Roman script, check romanized markers
+    mr_markers = set(MARKERS["romanized"]["mr"])
+    hi_markers = set(MARKERS["romanized"]["hi"])
+
+    def matches_marker(word: str, marker_set: set) -> bool:
+        """Exact match OR any marker is a prefix of the word (handles inflections like ahe->ahet)."""
+        if word in marker_set:
+            return True
+        return any(word.startswith(m) and len(m) >= 3 for m in marker_set)
+
     lower_words = [w.lower() for w in words]
-    mr_rom_matches = sum(1 for w in lower_words if w in MARKERS["romanized"]["mr"])
-    hi_rom_matches = sum(1 for w in lower_words if w in MARKERS["romanized"]["hi"])
+    mr_rom_matches = sum(1 for w in lower_words if matches_marker(w, mr_markers))
+    hi_rom_matches = sum(1 for w in lower_words if matches_marker(w, hi_markers))
 
     if mr_rom_matches > hi_rom_matches and mr_rom_matches > 0:
+        confidence = min(0.92, 0.70 + (mr_rom_matches * 0.05))
         return {
             "language": "mr",
             "script": "latin",
-            "confidence": 0.8,
+            "confidence": round(confidence, 2),
             "is_mixed": True
         }
     elif hi_rom_matches > mr_rom_matches and hi_rom_matches > 0:
+        confidence = min(0.92, 0.70 + (hi_rom_matches * 0.05))
         return {
             "language": "hi",
             "script": "latin",
-            "confidence": 0.8,
+            "confidence": round(confidence, 2),
             "is_mixed": True
         }
 

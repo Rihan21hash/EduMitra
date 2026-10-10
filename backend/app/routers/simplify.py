@@ -66,7 +66,8 @@ async def handle_simplify(payload: SimplifyRequest, db: Session = Depends(get_db
         new_answer = await ollama_client.generate(
             prompt=prompts["user"],
             system=prompts["system"],
-            temperature=0.5
+            temperature=0.4,
+            num_predict=320
         )
     except OllamaError as oe:
         status_code = 503 if oe.code == "MODEL_UNAVAILABLE" else 500
@@ -103,6 +104,22 @@ async def handle_simplify(payload: SimplifyRequest, db: Session = Depends(get_db
     db.add(db_response)
     db.commit()
     db.refresh(db_response)
+
+    try:
+        from app.models import ResponseVariant, gen_uuid, utc_now
+        var = ResponseVariant(
+            id=gen_uuid(),
+            response_id=db_response.id,
+            language=parent_resp.language,
+            content=new_answer,
+            origin="original",
+            model=settings.ollama_model,
+            created_at=utc_now()
+        )
+        db.add(var)
+        db.commit()
+    except Exception:
+        db.rollback()
 
     return QuestionResponse(
         conversation_id=question.conversation_id,

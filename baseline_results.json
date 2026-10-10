@@ -1,0 +1,123 @@
+[
+  {
+    "id": "mr_01",
+    "question": "न्यूटनचा पहिला नियम काय आहे?",
+    "model": "qwen2.5-coder:7b",
+    "word_count": 46,
+    "done_reason": "length",
+    "eval_count": 300,
+    "prompt_eval_count": 2303,
+    "num_predict": 300,
+    "num_ctx": 8192,
+    "options_sent": {
+      "temperature": 0.3,
+      "num_thread": 15,
+      "num_ctx": 8192,
+      "num_predict": 300
+    },
+    "length_truncated": true,
+    "prompt_truncated": false,
+    "validation_passed": true,
+    "validation_notes": [
+      "Answer word count (46) is below expected minimum (49) for beginner level"
+    ],
+    "content_snippet": "**न्यूटनचा पहिला नियम:**\n\nन्यूटनचा पहिला नियम म्हणजे कोणत्याही वस्तूचा आपल्या सध्याच्या अवस्थेत राहण्याचा स्वाभाविक गुणधर्म होय. म्हणजेच, स्थिर असलेली वस्तू स्वतःहून हलत नाही आणि ग...",
+    "full_content": "**न्यूटनचा पहिला नियम:**\n\nन्यूटनचा पहिला नियम म्हणजे कोणत्याही वस्तूचा आपल्या सध्याच्या अवस्थेत राहण्याचा स्वाभाविक गुणधर्म होय. म्हणजेच, स्थिर असलेली वस्तू स्वतःहून हलत नाही आणि गतिमान असलेली वस्तू स्वतःहून थांबत नाही.\n\n**दैनंदिन जीवनातील सोपे उदाहरण:**\n- तुम्ही जेव्हा बसमध्ये उभे असता आणि बस अचानक सुरू होते, त"
+  },
+  {
+    "id": "mr_02",
+    "question": "गुरुत्वाकर्षण म्हणजे काय आणि त्याचे सूत्र काय आहे?",
+    "model": "qwen2.5-coder:7b",
+    "word_count": 33,
+    "done_reason": "length",
+    "eval_count": 300,
+    "prompt_eval_count": 2464,
+    "num_predict": 300,
+    "num_ctx": 8192,
+    "options_sent": {
+      "temperature": 0.3,
+      "num_thread": 15,
+      "num_ctx": 8192,
+      "num_predict": 300
+    },
+    "length_truncated": true,
+    "prompt_truncated": false,
+    "validation_passed": true,
+    "validation_notes": [
+      "Answer word count (33) is below expected minimum (49) for beginner level"
+    ],
+    "content_snippet": "**गुरुत्वाकर्षण (Gravity) ची सोपी संकल्पना:**\n\nगुरुत्वाकर्षण म्हणजे कोणत्याही वस्तूच्या भागांच्या देखवण्याचा स्वाभाविक गुणधर्म होय. म्हणजेच, वस्तूना अपल्या भागांच्या देखवण्यासाठी ग...",
+    "full_content": "**गुरुत्वाकर्षण (Gravity) ची सोपी संकल्पना:**\n\nगुरुत्वाकर्षण म्हणजे कोणत्याही वस्तूच्या भागांच्या देखवण्याचा स्वाभाविक गुणधर्म होय. म्हणजेच, वस्तूना अपल्या भागांच्या देखवण्यासाठी गुरुत्वाकर्षणाचा विशेष असतो. या गुरुत्वाकर्षणाचा मुख्य अर्थ वस्तूच्या भागांच्या देखवण्यासाठी अपल्या भागांच्या देखवण्यासाठी गुरुत्वाकर्षण"
+  },
+  {
+    "id": "mr_03",
+    "question": "प्रकाशसंश्लेषण प्रक्रियेचे महत्त्व काय आहे?",
+    "model": "qwen2.5-coder:7b",
+    "word_count": 44,
+    "done_reason": "length",
+    "eval_count": 300,
+    "prompt_eval_count": 2445,
+    "num_predict": 300,
+    "num_ctx": 8192,
+    "options_sent": {
+      "temperature": 0.3,
+      "num_thread": 15,
+      "num_ctx": 8192,
+      "num_predict": 300
+    },
+    "length_truncated": true,
+    "prompt_truncated": false,
+    "validation_passed": true,
+    "validation_notes": [
+      "Answer word count (44) is below expected minimum (49) for beginner level"
+    ],
+    "content_snippet": "प्रकाशसंश्लेषण (Photosynthesis) ची सोपी संकल्पना:\n\nप्रकाशसंश्लेषण ची सोपी संकल्पना या वस्तूच्या आपल्या सध्याच्या अवस्थेत राहण्याचा स्वाभाविक गुणधर्म होते. या प्रक्रियेत वस्तूना प्र...",
+    "full_content": "प्रकाशसंश्लेषण (Photosynthesis) ची सोपी संकल्पना:\n\nप्रकाशसंश्लेषण ची सोपी संकल्पना या वस्तूच्या आपल्या सध्याच्या अवस्थेत राहण्याचा स्वाभाविक गुणधर्म होते. या प्रक्रियेत वस्तूना प्रकाश, धातू आणि ऑक्सीजन आहेत आणि त्यांना शून्य असलेला आयन आणि ऑक्सीजन आहेत.\n\nप्रकाशसंश्लेषण चे महत्त्व:\n\n1. शौन्य असलेला आयनांच्या वस्तूना शून्य असलेल"
+  },
+  {
+    "id": "mr_04",
+    "question": "ओहमचा नियम स्पष्ट करा आणि V = IR चे महत्त्व सांगा.",
+    "model": "qwen2.5-coder:7b",
+    "word_count": 55,
+    "done_reason": "length",
+    "eval_count": 300,
+    "prompt_eval_count": 2330,
+    "num_predict": 300,
+    "num_ctx": 8192,
+    "options_sent": {
+      "temperature": 0.3,
+      "num_thread": 15,
+      "num_ctx": 8192,
+      "num_predict": 300
+    },
+    "length_truncated": true,
+    "prompt_truncated": false,
+    "validation_passed": true,
+    "validation_notes": [],
+    "content_snippet": "**ओहमचा नियम आणि V = IR चे महत्त्व:**\n\nओहमचा नियम (Ohm's Law) या संकल्पनेचा महत्त्वाचे होता. या नियमाचे वापर करून हमी विद्युतचे वापर, दरवाजे आणि वापरकार्यांचे वापर सोडवू शकतात.\n\n**...",
+    "full_content": "**ओहमचा नियम आणि V = IR चे महत्त्व:**\n\nओहमचा नियम (Ohm's Law) या संकल्पनेचा महत्त्वाचे होता. या नियमाचे वापर करून हमी विद्युतचे वापर, दरवाजे आणि वापरकार्यांचे वापर सोडवू शकतात.\n\n**ओहमचा नियम:**\nओहमचा नियम याची सोपी संकल्पना: विद्युतचे वापर (I) आणि दरवाजे (V) यांचे गुणनफल वारसाहक्काचे वापर (R) साधारणतः समान आहे. त्यामुळे, V = IR असत"
+  },
+  {
+    "id": "mr_05",
+    "question": "अणू आणि रेणू यातील फरक काय आहे?",
+    "model": "qwen2.5-coder:7b",
+    "word_count": 55,
+    "done_reason": "length",
+    "eval_count": 300,
+    "prompt_eval_count": 2443,
+    "num_predict": 300,
+    "num_ctx": 8192,
+    "options_sent": {
+      "temperature": 0.3,
+      "num_thread": 15,
+      "num_ctx": 8192,
+      "num_predict": 300
+    },
+    "length_truncated": true,
+    "prompt_truncated": false,
+    "validation_passed": true,
+    "validation_notes": [],
+    "content_snippet": "अणू आणि रेणू यांचे फरक याचे मुख्य बिंदू यांचे विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा वि...",
+    "full_content": "अणू आणि रेणू यांचे फरक याचे मुख्य बिंदू यांचे विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा विवरण याचा"
+  }
+]

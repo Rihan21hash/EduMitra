@@ -19,7 +19,19 @@ import {
   ArrowLeft,
   ChevronRight,
   BookOpen,
+  Square,
+  Loader2,
 } from "lucide-react";
+
+interface StreamingState {
+  rawText: string;
+  partialText: string;
+  language: string;
+  level: string;
+  examMarks?: number | null;
+  subject?: string;
+  topic?: string;
+}
 
 export default function ChatPage() {
   const [uiLang, setUiLang] = useState<Locale>("mr");
@@ -29,12 +41,15 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isActionLoading, setIsActionLoading] = useState<boolean>(false);
+  const [isStreaming, setIsStreaming] = useState<boolean>(false);
+  const [streamingState, setStreamingState] = useState<StreamingState | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [lastFailedAction, setLastFailedAction] = useState<(() => void) | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [activeQuiz, setActiveQuiz] = useState<QuizCreateResponse | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const loadHistory = useCallback(async (uid: string) => {
     try {
@@ -70,10 +85,10 @@ export default function ChatPage() {
     initUser();
   }, [loadHistory]);
 
-  // Scroll to bottom on new message
+  // Auto-scroll to bottom on new content
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+  }, [messages, streamingState, isLoading]);
 
   const handleSelectConversation = async (convId: string) => {
     setActiveConversationId(convId);
@@ -90,8 +105,13 @@ export default function ChatPage() {
   };
 
   const handleNewChat = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
     setActiveConversationId(null);
     setMessages([]);
+    setStreamingState(null);
+    setIsStreaming(false);
     setErrorMessage(null);
   };
 
@@ -110,7 +130,16 @@ export default function ChatPage() {
     localStorage.setItem("edumitra_ui_lang", lang);
   };
 
-  // Submit question
+  const handleStopGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsStreaming(false);
+    setIsLoading(false);
+  };
+
+  // Submit question with streaming support
   const handleSend = async (
     text: string,
     level: string,
@@ -121,74 +150,160 @@ export default function ChatPage() {
     setIsLoading(true);
     setErrorMessage(null);
 
-    // Optimistically add question placeholder
-    const tempQuestionId = "q_temp_" + Date.now();
-    const tempResponseId = "r_temp_" + Date.now();
+    // Streaming mode
+    if (featureFlags.streaming) {
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      setIsStreaming(true);
 
-    const actionFn = async () => {
+      const streamInit: StreamingState = {
+        rawText: text,
+        partialText: "",
+        language: langOverride !== "auto" ? langOverride : uiLang,
+        level,
+        examMarks,
+      };
+      setStreamingState(streamInit);
+
+      let accumulated = "";
+      let metaInfo: any = {};
+
       try {
-        let resp;
-        if (level === "exam" && featureFlags.examMode) {
-          resp = await api.examAnswer({
-            user_id: userId,
-            conversation_id: activeConversationId,
-            text,
-            marks: examMarks || 5,
-            language_override: langOverride,
-          });
-        } else {
-          resp = await api.askQuestion({
+        await api.askQuestionStream(
+          {
             user_id: userId,
             conversation_id: activeConversationId,
             text,
             level,
             exam_marks: examMarks,
             language_override: langOverride,
-          });
-        }
-
-        if (!activeConversationId) {
-          setActiveConversationId(resp.conversation_id);
-          loadHistory(userId);
-        }
-
-        const newMsg: MessageItem = {
-          question_id: resp.question_id,
-          response_id: resp.response_id,
-          raw_text: text,
-          answer_text: resp.answer.text,
-          language: resp.detected_language,
-          level: resp.level,
-          exam_marks: resp.exam_marks,
-          intent: resp.intent,
-          subject: resp.subject,
-          topic: resp.topic,
-          validation_passed: resp.validation.passed,
-          explain_again_count: resp.explain_again_count || 0,
-          created_at: new Date().toISOString(),
-        };
-
-        setMessages((prev) => [...prev, newMsg]);
-        setErrorMessage(null);
+          },
+          {
+            onMeta: (meta) => {
+              metaInfo = meta;
+              if (meta.conversation_id && !activeConversationId) {
+                setActiveConversationId(meta.conversation_id);
+                loadHistory(userId);
+              }
+              setStreamingState((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      language: meta.language || prev.language,
+                      subject: meta.subject,
+                      topic: meta.topic,
+                    }
+                  : null
+              );
+            },
+            onToken: (token) => {
+              accumulated += token;
+              setStreamingState((prev) => (prev ? { ...prev, partialText: accumulated } : null));
+            },
+            onDone: (data) => {
+              const fullMsg: MessageItem = {
+                question_id: data.question_id || "q_" + Date.now(),
+                response_id: data.response_id || "r_" + Date.now(),
+                raw_text: text,
+                answer_text: data.answer_text || accumulated,
+                language: metaInfo.language || uiLang,
+                level,
+                exam_marks: examMarks,
+                intent: metaInfo.intent || "explain",
+                subject: metaInfo.subject || "General",
+                topic: metaInfo.topic || "General",
+                validation_passed: data.validation?.passed ?? true,
+                explain_again_count: 0,
+                created_at: new Date().toISOString(),
+              };
+              setMessages((prev) => [...prev, fullMsg]);
+              setStreamingState(null);
+              setIsStreaming(false);
+              setIsLoading(false);
+            },
+            onError: (err) => {
+              console.error("Stream error:", err);
+              setErrorMessage(err.message || t(errors.generic, uiLang));
+              setStreamingState(null);
+              setIsStreaming(false);
+              setIsLoading(false);
+            },
+          },
+          controller.signal
+        );
       } catch (err: any) {
-        console.error("Ask question error:", err);
-        const code = err.code || "INTERNAL";
-        let msg = t(errors.generic, uiLang);
-        if (code === "MODEL_UNAVAILABLE") msg = t(errors.modelUnavailable, uiLang);
-        else if (code === "MODEL_TIMEOUT") msg = t(errors.timeout, uiLang);
-        else if (code === "NETWORK_ERROR") msg = t(errors.network, uiLang);
-
-        setErrorMessage(msg);
-        setLastFailedAction(() => () => handleSend(text, level, examMarks, langOverride));
-      } finally {
+        if (err.name !== "AbortError") {
+          console.error("Ask question error:", err);
+          setErrorMessage(t(errors.generic, uiLang));
+        }
+        setStreamingState(null);
+        setIsStreaming(false);
         setIsLoading(false);
       }
-    };
+      return;
+    }
 
-    await actionFn();
+    // Buffered fallback mode
+    try {
+      let resp;
+      if (level === "exam" && featureFlags.examMode) {
+        resp = await api.examAnswer({
+          user_id: userId,
+          conversation_id: activeConversationId,
+          text,
+          marks: examMarks || 5,
+          language_override: langOverride,
+        });
+      } else {
+        resp = await api.askQuestion({
+          user_id: userId,
+          conversation_id: activeConversationId,
+          text,
+          level,
+          exam_marks: examMarks,
+          language_override: langOverride,
+        });
+      }
+
+      if (!activeConversationId) {
+        setActiveConversationId(resp.conversation_id);
+        loadHistory(userId);
+      }
+
+      const newMsg: MessageItem = {
+        question_id: resp.question_id,
+        response_id: resp.response_id,
+        raw_text: text,
+        answer_text: resp.answer.text,
+        language: resp.detected_language,
+        level: resp.level,
+        exam_marks: resp.exam_marks,
+        intent: resp.intent,
+        subject: resp.subject,
+        topic: resp.topic,
+        validation_passed: resp.validation.passed,
+        explain_again_count: resp.explain_again_count || 0,
+        created_at: new Date().toISOString(),
+      };
+
+      setMessages((prev) => [...prev, newMsg]);
+      setErrorMessage(null);
+    } catch (err: any) {
+      console.error("Ask question error:", err);
+      const code = err.code || "INTERNAL";
+      let msg = t(errors.generic, uiLang);
+      if (code === "MODEL_UNAVAILABLE") msg = t(errors.modelUnavailable, uiLang);
+      else if (code === "MODEL_TIMEOUT") msg = t(errors.timeout, uiLang);
+      else if (code === "NETWORK_ERROR") msg = t(errors.network, uiLang);
+
+      setErrorMessage(msg);
+      setLastFailedAction(() => () => handleSend(text, level, examMarks, langOverride));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Follow-up actions: simplify, explain_again, example, summarize
+  // Follow-up actions
   const handleFollowUp = async (action: string, responseId: string) => {
     if (!userId) return;
     setIsActionLoading(true);
@@ -210,7 +325,6 @@ export default function ChatPage() {
         });
       }
 
-      // Find original question text
       const prevMsg = messages.find((m) => m.response_id === responseId);
       const qText = prevMsg ? prevMsg.raw_text : "Follow-up";
 
@@ -260,7 +374,7 @@ export default function ChatPage() {
       const msg = e.message || "Failed to generate quiz";
       setErrorMessage(
         msg.includes("Ollama") || msg.includes("connect")
-          ? "AI engine is not responding. Please make sure Ollama is running and try again."
+          ? "AI engine is not responding. Please ensure Ollama is running and try again."
           : msg
       );
     } finally {
@@ -306,6 +420,16 @@ export default function ChatPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {isStreaming && (
+              <button
+                onClick={handleStopGeneration}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-100 text-red-700 hover:bg-red-200 transition-colors cursor-pointer"
+              >
+                <Square className="w-3 h-3 fill-red-700" />
+                <span>{t(chat.stop, uiLang)}</span>
+              </button>
+            )}
+
             {featureFlags.progress && (
               <Link
                 href="/progress"
@@ -326,7 +450,7 @@ export default function ChatPage() {
 
         {/* Message Thread */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
-          {/* Friendly localized error banner with retry */}
+          {/* Localized error banner with retry */}
           {errorMessage && (
             <div className="max-w-3xl mx-auto p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs sm:text-sm flex items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-2.5">
@@ -348,7 +472,7 @@ export default function ChatPage() {
           )}
 
           {/* Empty State */}
-          {messages.length === 0 && !isLoading && (
+          {messages.length === 0 && !isLoading && !streamingState && (
             <div className="max-w-2xl mx-auto my-auto py-12 text-center space-y-6">
               <div className="w-16 h-16 rounded-3xl bg-[var(--brand-light)] text-[var(--brand)] flex items-center justify-center mx-auto shadow-xs">
                 <Sparkles className="w-8 h-8 text-[var(--brand)]" />
@@ -412,10 +536,34 @@ export default function ChatPage() {
               </div>
             ))}
 
-            {/* Loading Indicator */}
-            {isLoading && (
+            {/* In-Flight Streaming Message */}
+            {streamingState && (
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl rounded-tr-xs bg-[var(--brand)] text-white px-5 py-3 text-[15px] sm:text-[16px] shadow-xs">
+                    {streamingState.rawText}
+                  </div>
+                </div>
+
+                <AnswerCard
+                  responseId="streaming-temp"
+                  answerText={streamingState.partialText || "..."}
+                  language={streamingState.language}
+                  level={streamingState.level}
+                  examMarks={streamingState.examMarks}
+                  subject={streamingState.subject}
+                  topic={streamingState.topic}
+                  uiLang={uiLang}
+                  onFollowUp={() => {}}
+                  isStreaming={true}
+                />
+              </div>
+            )}
+
+            {/* Initial thinking loader (before first stream token) */}
+            {isLoading && !streamingState && (
               <div className="max-w-4xl mx-auto p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border)] flex items-center gap-3">
-                <div className="w-4 h-4 border-2 border-[var(--brand)] border-t-transparent rounded-full animate-spin shrink-0" />
+                <Loader2 className="w-4 h-4 animate-spin text-[var(--brand)] shrink-0" />
                 <span className="text-xs sm:text-sm font-medium text-[var(--text-muted)] animate-pulse">
                   {t(chat.thinking, uiLang)}
                 </span>
@@ -427,7 +575,7 @@ export default function ChatPage() {
         </div>
 
         {/* Composer */}
-        <Composer onSend={handleSend} isLoading={isLoading || isActionLoading} uiLang={uiLang} />
+        <Composer onSend={handleSend} isLoading={isLoading || isActionLoading || isStreaming} uiLang={uiLang} />
       </div>
 
       {/* Quiz Modal */}
@@ -437,6 +585,12 @@ export default function ChatPage() {
           userId={userId}
           uiLang={uiLang}
           onClose={() => setActiveQuiz(null)}
+          onExplainAgain={() => {
+            const lastMsg = messages[messages.length - 1];
+            if (lastMsg) {
+              handleFollowUp("explain_again", lastMsg.response_id);
+            }
+          }}
         />
       )}
     </div>

@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Text, Boolean
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Text, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.db import Base
 
@@ -34,6 +34,21 @@ class Conversation(Base):
 
     user = relationship("User", back_populates="conversations")
     questions = relationship("Question", back_populates="conversation", cascade="all, delete-orphan")
+    state = relationship("ConversationState", back_populates="conversation", uselist=False, cascade="all, delete-orphan")
+
+class ConversationState(Base):
+    __tablename__ = "conversation_state"
+
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    conversation_id = Column(String(36), ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False, unique=True)
+    summary = Column(Text, nullable=True)
+    subject = Column(String(50), nullable=True)
+    topic = Column(String(100), nullable=True)
+    last_response_id = Column(String(36), nullable=True)
+    answer_language = Column(String(10), nullable=True)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
+
+    conversation = relationship("Conversation", back_populates="state")
 
 class Question(Base):
     __tablename__ = "questions"
@@ -75,6 +90,21 @@ class Response(Base):
     question = relationship("Question", back_populates="responses")
     feedback = relationship("Feedback", back_populates="response", cascade="all, delete-orphan")
     quizzes = relationship("Quiz", back_populates="response", cascade="all, delete-orphan")
+    variants = relationship("ResponseVariant", back_populates="response", cascade="all, delete-orphan")
+
+class ResponseVariant(Base):
+    __tablename__ = "response_variants"
+    __table_args__ = (UniqueConstraint("response_id", "language", name="uq_response_language"),)
+
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    response_id = Column(String(36), ForeignKey("responses.id", ondelete="CASCADE"), nullable=False)
+    language = Column(String(10), nullable=False)
+    content = Column(Text, nullable=False)
+    origin = Column(String(20), default="generated")  # generated | translated | original
+    model = Column(String(50), default="qwen2.5-coder:7b")
+    created_at = Column(DateTime, default=utc_now)
+
+    response = relationship("Response", back_populates="variants")
 
 class Feedback(Base):
     __tablename__ = "feedback"
@@ -92,6 +122,10 @@ class Quiz(Base):
     id = Column(String(36), primary_key=True, default=gen_uuid)
     response_id = Column(String(36), ForeignKey("responses.id"), nullable=True)
     user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
+    topic_key = Column(String(100), nullable=True)
+    language = Column(String(10), nullable=True)
+    subject = Column(String(50), nullable=True)
+    topic = Column(String(100), nullable=True)
     questions_json = Column(Text, nullable=False)  # includes correct answers, server-side only
     created_at = Column(DateTime, default=utc_now)
 
@@ -106,6 +140,7 @@ class QuizAttempt(Base):
     quiz_id = Column(String(36), ForeignKey("quizzes.id"), nullable=False)
     user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     phase = Column(String(10), default="post")  # pre | post
+    baseline_type = Column(String(30), default="first-attempt")
     score = Column(Integer, nullable=False)
     total = Column(Integer, nullable=False)
     answers_json = Column(Text, nullable=False)
